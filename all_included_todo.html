@@ -108,6 +108,7 @@
             width: 80%;
             padding-bottom: 4px;
             border-bottom: 1px solid #777;
+            word-wrap: break-word;
         }
         .btn-container {
             text-align: right;
@@ -133,7 +134,9 @@
             color:#fff;
             background-color: #976f48;
         }
-
+        .hide {
+            visibility: hidden;
+        }
         /* Responsive design */
         @media screen and (max-width: 768px) {
             form {
@@ -271,9 +274,11 @@
         // ----------------------Done-------------------------
         const doneHandler = event => {
             const eventTarget = event.target;
+            const editBtn = eventTarget.parentNode.lastChild.firstChild;
+
             if(eventTarget.classList[0] === 'input-checkbox') {
                 eventTarget.nextElementSibling.classList.toggle('line-through');
-
+                editBtn.classList.toggle('hide'); // if done, editing is not possible
                 if(eventTarget.checked) {
                     completedTasksNo.innerText = Number(completedTasksNo.innerText) + 1;
                     activeTasksNo.innerText = Number(activeTasksNo.innerText) - 1;
@@ -289,11 +294,26 @@
             const eventTarget = event.target;
             if(eventTarget.classList[0] === 'edit') {
                 const toEdit = eventTarget.parentNode.previousSibling;
-                toEdit.setAttribute('contenteditable', 'true');
+                toEdit.setAttribute('contenteditable', 'true'); // out of foucus
                 toEdit.focus();
             }
         }
         todoList.addEventListener('click', editHandler);
+            // ------------------------Editable - reset contenteditable--------------------------
+        const foucusOutHandler = event => {
+            const eventTarget = event.target;
+            if(eventTarget.className === 'todo-added') eventTarget.setAttribute('contenteditable', 'false');
+        }
+        todoList.addEventListener('focusout', foucusOutHandler);
+            // ------------------------Editable - handle default enter behavoiur of contenteditable------
+        const enterEditHandler = event => {
+            const eventTarget = event.target;
+            if(eventTarget.className === 'todo-added' && event.keyCode === 13) {
+                event.preventDefault();
+                eventTarget.blur();
+            }
+        }
+        todoList.addEventListener('keydown', enterEditHandler);
         // ------------------------Filter All Tasks--------------------------
         const filterTotalTasks = () => {
             let items = todoList.getElementsByTagName('li');
@@ -301,11 +321,13 @@
                 const element = items[i];
                 element.style.display = 'flex';
             }
+            todoList.firstElementChild.innerText = 'TODO LIST';
         }
         totalTasks.addEventListener('click', filterTotalTasks);
         // ------------------------Filter Active Tasks--------------------------
         const filterActiveTasks = () => {
             filterTotalTasks();
+            todoList.firstElementChild.innerText = 'ACTIVE TASKS';
             let items = todoList.getElementsByTagName('li');
             for (let i = 0; i < items.length; i++) {
                 const element = items[i];
@@ -316,6 +338,7 @@
         // ------------------------Filter Completed Tasks--------------------------
         const filterCompletedTasks = () => {
             filterTotalTasks();
+            todoList.firstElementChild.innerText = 'COMPLETED TASKS';
             let items = todoList.getElementsByTagName('li');
             for (let i = 0; i < items.length; i++) {
                 const element = items[i];
@@ -323,6 +346,7 @@
             }
         }
         completedTasks.addEventListener('click', filterCompletedTasks);
+
     </script>
 </body>
 </html>
